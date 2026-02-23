@@ -108,11 +108,12 @@ export default function DetailsPage({
     setSubmitting(true);
 
     try {
-      const supabase = createClient();
       const startTs = `${dateStr}T${timeStr}:00`;
 
-      const { data: result, error } = await supabase.functions.invoke("book", {
-        body: {
+      const response = await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           center_id: centerId,
           service_id: serviceId,
           start_ts: startTs,
@@ -125,11 +126,13 @@ export default function DetailsPage({
           reason_text: data.reason_text || null,
           consent_privacy: data.consent_privacy,
           consent_data_accuracy: data.consent_data_accuracy,
-        },
+        }),
       });
 
-      if (error) {
-        toast.error(error.message || "Error al reservar la cita");
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || "Error al reservar la cita");
         return;
       }
 

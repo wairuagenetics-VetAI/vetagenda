@@ -76,22 +76,22 @@ export default function SlotsPage({
       setSelectedSlot(null);
 
       try {
-        const supabase = createClient();
         const dateStr = format(date, "yyyy-MM-dd");
 
-        const { data, error } = await supabase.functions.invoke(
-          "availability",
-          {
-            body: {
-              center_id: centerId,
-              service_id: serviceId,
-              date: dateStr,
-            },
-          }
-        );
+        const response = await fetch("/api/availability", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            center_id: centerId,
+            service_id: serviceId,
+            date: dateStr,
+          }),
+        });
 
-        if (error) {
-          console.error("Error al cargar disponibilidad:", error);
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error("Error al cargar disponibilidad:", data.error);
           setSlots([]);
         } else if (data?.slots) {
           setSlots(data.slots);
